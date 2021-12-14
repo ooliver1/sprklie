@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block body -%}
+{% include "partials/icons.html" %}
+
+<input type="checkbox" class="hidden absolute" id="__navigation">
+<!-- <input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc"> -->
+<label class="z-20 sidebar-overlay" for="__navigation">
+  <div class="sr-only">Hide navigation sidebar</div>
+</label>
+<!-- <label class="overlay toc-overlay" for="__toc">
+    <div class="visually-hidden">Hide table of contents sidebar</div>
+  </label> -->
+
+{% if theme_announcement -%}
+<div>
+  <aside>
+    {% block announcement %} {{ theme_announcement }} {% endblock announcement %}
+  </aside>
+</div>
+{%- endif %}
+
+<div>
+  <header>
+    <div>
+      <label for="__navigation">
+        <div class="sr-only">Toggle site navigation sidebar</div>
+        <i><svg>
+            <use href="#svg-menu"></use>
+          </svg></i>
+      </label>
+    </div>
+    <div>
+      <a href="{{ pathto(master_doc) }}">
+        <div>{{ docstitle if docstitle else project }}</div>
+      </a>
+    </div>
+    <div>
+      <div>
+        <button class="theme-toggle">
+          <div class="sr-only">Toggle Light / Dark / Auto color theme</div>
+          <svg id="icon-dark" class="hidden">
+            <use href="#svg-moon"></use>
+          </svg>
+          <svg id="icon-light" class="hidden">
+            <use href="#svg-sun"></use>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  <aside style="transition: left 250ms ease-in-out;"
+    class="sidebar-drawer transition-transform duration-250 transform-gpu z-30">
+    <div>
+      {% block left_sidebar %}
+      <div>
+        {%- for sidebar_section in sidebars %}
+        {%- include sidebar_section %}
+        {%- endfor %}
+      </div>
+      {% endblock left_sidebar %}
+    </div>
+  </aside>
+  <div>
+    <div>
+      <div>
+        <div>
+          <article role="main">
+            {% block content %}{{ body }}{% endblock %}
+          </article>
+        </div>
+        <footer>
+          {% block footer %}
+          <div>
+            {% if next -%}
+            <a href="{{ next.link }}">
+              <div>
+                <div>
+                  <span>{{ _("Next") }}</span>
+                </div>
+                <div>{{ next.title }}</div>
+              </div>
+              <svg>
+                <use href="#svg-arrow-right"></use>
+              </svg>
+            </a>
+            {%- endif %}
+            {% if prev -%}
+            <a href="{{ prev.link }}">
+              <svg>
+                <use href="#svg-arrow-right"></use>
+              </svg>
+              <div>
+                <div>
+                  <span>{{ _("Previous") }}</span>
+                </div>
+                {% if prev.link == pathto(master_doc) %}
+                <div>{{ _("Home") }}</div>
+                {% else %}
+                <div>{{ prev.title }}</div>
+                {% endif %}
+              </div>
+            </a>
+            {%- endif %}
+          </div>
+
+          <div>
+            {%- if show_copyright %}
+            {%- if hasdoc('copyright') %}
+            {% trans path=pathto('copyright'), copyright=copyright|e -%}
+            <a href="{{ path }}">Copyright</a> &#169; {{ copyright }}.
+            {%- endtrans %}
+            {%- else %}
+            {% trans copyright=copyright|e -%}
+            Copyright &#169; {{ copyright }}
+            {%- endtrans %}
+            {%- endif %}
+            {%- endif %}
+            {%- if last_updated %}
+            {%- if show_copyright %} | {%- endif %}
+            {% trans last_updated=last_updated|e -%}
+            Last updated on {{ last_updated }}.
+            {%- endtrans %}
+            {%- endif %}
+            {%- if show_sphinx %}
+            {%- if show_copyright or last_updated %} | {%- endif %}
+            {% trans -%}
+            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+            and
+            <a href="https://tooty.xyz">@ooliver1</a>'s
+            <a href="https://github.com/ooliver1/tooty-theme">Tooty theme</a>.
+            {%- endtrans %}
+            {%- endif %}
+            {%- if show_source and has_source and sourcename %}
+            {%- if show_copyright or last_updated or show_sphinx %} | {%- endif %}
+            <a href="{{ pathto('_sources/' + sourcename, true)|e }}" rel="nofollow">
+              {{ _('Show Source') }}
+            </a>
+            {%- endif %}
+          </div>
+          {% endblock footer %}
+        </footer>
+      </div>
+      <aside class="toc-drawer{% if tooty_hide_toc %} no-toc{% endif %}">
+        {% block right_sidebar %}
+        {% if not tooty_hide_toc %}
+        <div>
+          <div>
+            <span>
+              {{ _("Contents") }}
+            </span>
+          </div>
+          <div>
+            <div>
+              {{ toc }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% endblock right_sidebar %}
+      </aside>
+    </div>
+  </div>
+  {%- endblock %}

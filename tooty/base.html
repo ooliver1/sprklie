@@ -1,0 +1,178 @@
+<!doctype html>
+<html id="html" {% if language is not none %} lang="{{ language }}" {% endif %}>
+
+<head>
+  {%- block site_meta -%}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light dark">
+
+  {%- if metatags %}{{ metatags }}
+  {% endif -%}
+
+  {%- block linktags %}
+  {%- if hasdoc("about") -%}
+  <link rel="author" title="{{ _('About these documents') }}" href="{{ pathto('about') }}" />
+  {%- endif -%}
+  {%- if hasdoc("genindex") -%}
+  <link rel="index" title="{{ _('Index') }}" href="{{ pathto('genindex') }}" />
+  {%- endif -%}
+  {%- if hasdoc("search") -%}
+  <link rel="search" title="{{ _('Search') }}" href="{{ pathto('search') }}" />
+  {%- endif -%}
+  {%- if hasdoc("copyright") -%}
+  <link rel="copyright" title="{{ _('Copyright') }}" href="{{ pathto('copyright') }}" />
+  {%- endif -%}
+  {%- if next -%}
+  <link rel="next" title="{{ next.title|striptags|e }}" href="{{ next.link|e }}" />
+  {%- endif -%}
+  {%- if prev -%}
+  <link rel="prev" title="{{ prev.title|striptags|e }}" href="{{ prev.link|e }}" />
+  {%- endif -%}
+  {%- endblock linktags %}
+
+  {# Favicon #}
+  {%- if favicon_url -%}
+  <link rel="shortcut icon" href="{{ favicon_url }}" />
+  {%- endif -%}
+
+  {#- Generator banner -#}
+  <meta name="generator" content="sphinx-{{ sphinx_version }}, furo {{ furo_version }}" />
+
+  {%- endblock site_meta -%}
+
+  {#- Site title -#}
+  {%- block htmltitle -%}
+  {% if not docstitle %}
+  <title>{{ title|striptags|e }}</title>
+  {% elif pagename == master_doc %}
+  <title>{{ docstitle|striptags|e }}</title>
+  {% else %}
+  <title>{{ title|striptags|e }}
+    -
+    {{ docstitle|striptags|e }}</title>
+  {% endif %}
+  {%- endblock -%}
+
+  {%- block styles -%}
+
+  {# Custom stylesheets #}
+  {%- block regular_styles -%}
+  {%- for css in css_files -%}
+  {% if css|attr("filename") -%}
+  {{ css_tag(css) }}
+  {%- else -%}
+  <link rel="stylesheet" href="{{ pathto(css, 1)|e }}" type="text/css" />
+  {%- endif %}
+  {% endfor -%}
+  {%- endblock regular_styles -%}
+
+  {#- Theme-related stylesheets -#}
+  {%- block theme_styles %}
+  {% include "partials/css_vars.html" with context %}
+  {%- endblock -%}
+
+  {%- block extra_styles %}{%- endblock -%}
+
+  {%- endblock styles -%}
+
+  {#- Custom front matter #}
+  {%- block extrahead -%}{%- endblock -%}
+</head>
+
+<body>
+  <script>
+    currentTheme = localStorage.getItem("theme");
+    const prefersDark = window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .matches;
+    if (currentTheme === null) {
+      if (prefersDark) {
+        currentTheme = "dark";
+      } else {
+        currentTheme = "light";
+      }
+    }
+
+    function setTheme(mode) {
+      document.documentElement.classList.toggle("dark");
+      document.body.dataset.theme = mode;
+      localStorage.setItem("theme", mode);
+      document.documentElement.setAttribute("data-theme", mode);
+    }
+
+    if (currentTheme === "dark") {
+      setTheme("dark");
+      console.log("Setting theme to dark");
+    } else {
+      setTheme("light");
+      console.log("Setting theme to light");
+    }
+  </script>
+  <script>
+    function setTheme(mode) {
+      if (mode !== "light" && mode !== "dark" && mode !== "auto") {
+        console.error(`Got invalid theme mode: ${mode}. Resetting to auto.`);
+        mode = "auto";
+      }
+
+      document.body.dataset.theme = mode;
+      localStorage.setItem("theme", mode);
+      document.documentElement.setAttribute("data-theme", mode);
+      if (mode === "dark") {
+        document.getElementById("html").classList.add("dark");
+      } else {
+        document.getElementById("html").classList.remove("dark");
+      }
+      console.log(`Changed to ${mode} mode.`);
+    }
+
+    function cycleThemeOnce() {
+      const currentTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      if (currentTheme === null) {
+        setTheme(prefersDark ? "dark" : "light");
+      } else if (currentTheme === "dark") {
+        setTheme("light");
+      } else if (currentTheme == "light") {
+        setTheme("dark");
+      }
+    }
+
+    function setupTheme() {
+      // Attach event handlers for toggling themes
+      const buttons = document.getElementsByClassName("theme-toggle");
+      Array.from(buttons).forEach((btn) => {
+        btn.addEventListener("click", cycleThemeOnce);
+      });
+    }
+
+    function setup() {
+      setupTheme();
+    }
+
+    function main() {
+      setup();
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
+  </script>
+  {% block body %}{% endblock %}
+
+  {%- block scripts -%}
+
+  {# Custom JS #}
+  {%- block regular_scripts -%}
+  {% for path in script_files -%}
+  {{ js_tag(path) }}
+  {% endfor -%}
+  {%- endblock regular_scripts -%}
+
+  {# Theme-related JavaScript code #}
+  {%- block theme_scripts -%}{%- endblock -%}
+
+  {%- endblock scripts -%}
+</body>
+
+</html>
